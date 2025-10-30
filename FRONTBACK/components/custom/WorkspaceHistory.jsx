@@ -1,0 +1,44 @@
+import { useConvex } from "convex/react";
+import React, { use } from "react";
+import { useContext, useEffect, useState } from "react";
+import { UserDetailContext } from "@/context/UserDetailContext";
+import { api } from "@/convex/_generated/api";
+import { useSidebar } from "../ui/sidebar";
+import Link from "next/link";
+
+function WorkspaceHistory() {
+  const { userDetail, setUserDetail } = useContext(UserDetailContext);
+  const convex = useConvex();
+  const [workspaceList, setWorkspaceList] = useState();
+  const {toggleSidebar}=useSidebar();
+
+  useEffect(() => {
+    userDetail && GetAllWorkspace();
+  }, [userDetail]);
+
+  const GetAllWorkspace = async () => {
+    const result = await convex.query(api.workspace.GetAllWorkspace, {
+      userId: userDetail?._id,
+    });
+    setWorkspaceList(result);
+
+    console.log(result);
+  };
+  return (
+    <div>
+      <h2 className="font-medium text-lg">Apke Chats</h2>
+      <div>
+        {workspaceList &&
+          workspaceList.map((workspace, index) => (
+            <Link onClick={toggleSidebar} href={"/workspace/" + workspace?._id} key={index}>
+              <h2 className="text-sm text-gray-400 mt-2 font-light cursor-pointer hover:text-white">
+                {workspace?.messages?.[0]?.content}
+              </h2>
+            </Link>
+          ))}
+      </div>
+    </div>
+  );
+}
+
+export default WorkspaceHistory;
